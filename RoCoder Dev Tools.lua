@@ -41,6 +41,15 @@ local Events = {
 
 -- Variables
 local TracePath
+local ConnectionType
+
+
+-- Functions
+local function PrintConnections()
+	for i,v in pairs(getfenv(getconnections(TracePath[ConnectionType]))) do
+     		print(i,v)
+	end)
+end
 
 
 
@@ -49,7 +58,7 @@ EventsTab:AddTextbox({ -- Add path textbox for event tracing
 	Default = "",
 	TextDisappear = false,
 	Callback = function(Value)
-		TracePath = Value
+		TracePath = string.format(Value, "%s")
 	end	  
 })
 EventsTab:AddDropdown({
@@ -57,13 +66,24 @@ EventsTab:AddDropdown({
 	Default = "None",
 	Options = Events,
 	Callback = function(Value)
-    	if loadstring(TracePath..":IsA('GuiObject')") == true then
-    		print("Selected GuiObject")
-    	elseif loadstring(TracePath..":IsA('BasePart')") == true then
-            print("Selected BasePart")
-    	end
-	end    
+		if TracePath ~= nil then
+			ConnectionType = Value
+		end
+	end
 })
+EventsTab:AddButton({
+	Name = "Check for scripts",
+	Callback = function()
+		local success, err = pcall(PrintConnections)
+		
+		if success then
+			print("Traced connections")
+		else
+			warn(err)
+		end
+  	end
+})
+
 
 
 
