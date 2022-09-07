@@ -45,18 +45,32 @@ local ConnectionType
 
 
 -- Functions
+
+local function GetPath(obj, isString)
+	if isString == true then
+		local path
+		local segemets = {obj.Name}
+		while true do
+			table.insert(segments, obj.Parent)
+		end
+	end
+end
+
 local function PrintConnections()
-	local path = TracePath
-	local segments=path:split("")
+	local path = TracePath.."."..ConnectionType
+	local segments=TracePath:split(".")
 	local current=game --location to search
 	for i,v in pairs(segments) do
-		current=current[v]
+		if i > 1 then
+			current=current[v]
+		end
 	end
 	path = current
 
-
-	for i,v in pairs(getconnections(path[ConnectionType])) do
-     	print(getfenv(getconnections(path)[i].Function).script)
+	local resultstable = {}
+	for i,v in pairs(getconnections(path)) do
+     		table.insert(resultstable, getfenv(getconnections(path)[i].Function).script.Name)
+		print("Result "..i.." path is: ")
 	end
 end
 
@@ -68,14 +82,6 @@ EventsTab:AddTextbox({ -- Add path textbox for event tracing
 	TextDisappear = false,
 	Callback = function(Value)
 		TracePath = Value
-		local segments=TracePath:split(".")
-		local current=game --location to search
-		for i,v in pairs(segments) do
-			if i > 1 then
-				current=current[v]
-			end
-		end
-		TracePath = current
 	end
 })
 EventsTab:AddDropdown({
@@ -84,11 +90,10 @@ EventsTab:AddDropdown({
 	Options = Events,
 	Flag = "ConnectionType",
 	Callback = function(Value)
-		if TracePath ~= nil then
-			ConnectionType = Value
-		end
+		ConnectionType = Value
 	end
 })
+local TraceResults = EventsTab:AddParagraph("Results","")
 EventsTab:AddButton({
 	Name = "Check for scripts",
 	Callback = function()
