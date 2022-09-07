@@ -46,9 +46,18 @@ local ConnectionType
 
 -- Functions
 local function PrintConnections()
-	for i,v in pairs(getfenv(getconnections(TracePath[ConnectionType]))) do
-     		print(i,v)
-	end)
+	local path = TracePath
+	local segments=path:split("")
+	local current=game --location to search
+	for i,v in pairs(segments) do
+		current=current[v]
+	end
+	path = current
+
+
+	for i,v in pairs(getconnections(path[ConnectionType])) do
+     	print(getfenv(getconnections(path)[i].Function).script)
+	end
 end
 
 
@@ -58,13 +67,22 @@ EventsTab:AddTextbox({ -- Add path textbox for event tracing
 	Default = "",
 	TextDisappear = false,
 	Callback = function(Value)
-		TracePath = string.format(Value, "%s")
-	end	  
+		TracePath = Value
+		local segments=TracePath:split(".")
+		local current=game --location to search
+		for i,v in pairs(segments) do
+			if i > 1 then
+				current=current[v]
+			end
+		end
+		TracePath = current
+	end
 })
 EventsTab:AddDropdown({
 	Name = "EventType",
 	Default = "None",
 	Options = Events,
+	Flag = "ConnectionType",
 	Callback = function(Value)
 		if TracePath ~= nil then
 			ConnectionType = Value
