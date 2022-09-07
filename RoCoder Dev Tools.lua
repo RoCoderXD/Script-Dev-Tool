@@ -47,18 +47,21 @@ local ConnectionType
 -- Functions
 
 local function GetPath(obj, isString)
-	if isString == true then
-		local path
-		local segemets = {obj.Name}
-		while true do
-			table.insert(segments, obj.Parent)
-		end
-	end
+	
+	
+	return obj:GetFullName()
+	--if isString == true then
+		--local path
+		--local segemets = {obj.Name}
+		--for i=1, #
+			--table.insert(segments, obj.Parent)
+		--end
+	--end
 end
 
-local function PrintConnections()
+local function PrintConnections(TraceResults)
 	local path = TracePath.."."..ConnectionType
-	local segments=TracePath:split(".")
+	local segments=path:split(".")
 	local current=game --location to search
 	for i,v in pairs(segments) do
 		if i > 1 then
@@ -69,9 +72,18 @@ local function PrintConnections()
 
 	local resultstable = {}
 	for i,v in pairs(getconnections(path)) do
-     		table.insert(resultstable, getfenv(getconnections(path)[i].Function).script.Name)
-		print("Result "..i.." path is: ")
+     	table.insert(resultstable, getfenv(getconnections(path)[i].Function).script.Name)
+		print("Result "..i.." path is: "..GetPath(getfenv(getconnections(path)[i].Function).script, true))
 	end
+
+	if #resultstable > 0 then
+		TraceResults:Set(table.concat(resultstable, ", ")..". Check console for paths!")
+	else
+		TraceResults:Set("Nothing found!")
+		wait(3)
+		TraceResults:Set("")
+	end
+
 end
 
 
@@ -97,7 +109,7 @@ local TraceResults = EventsTab:AddParagraph("Results","")
 EventsTab:AddButton({
 	Name = "Check for scripts",
 	Callback = function()
-		local success, err = pcall(PrintConnections)
+		local success, err = pcall(PrintConnections, TraceResults)
 		
 		if success then
 			print("Traced connections")
